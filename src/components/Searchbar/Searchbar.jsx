@@ -7,7 +7,7 @@ class SearchBar extends Component {
         return (
           <>
             <header className={css.Searchbar}>
-              <SearchForm/>
+              <SearchForm handleSearch={this.props.handleSearch} />
             </header>
           </>
         );

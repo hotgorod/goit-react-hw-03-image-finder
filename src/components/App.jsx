@@ -2,6 +2,7 @@ import ImageGallery from "./ImageGallery/ImageGallery";
 import SearchForm from "./SearchForm/SearchForm";
 import SearchBar from "./Searchbar/Searchbar";
 import { Component } from "react";
+import Modal from "./Modal/Modal";
 
 export class App extends Component {
   state = {
@@ -15,8 +16,9 @@ export class App extends Component {
   render() {
     return (
     <div>
-        <SearchBar onSubmit={this.handleSearch} />
+        <SearchBar handleSearch={this.handleSearch} />
         <ImageGallery searchText={this.state.searchText} />
+        
     </div>
   );}
 }
