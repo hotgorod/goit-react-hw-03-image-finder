@@ -10,7 +10,8 @@ class SearchForm extends Component {
   };
   handleSubmit = e => {
       e.preventDefault();
-      this.props.handleSearch(this.state.value);
+    this.props.handleSearch(this.state.value);
+    this.setState({ value: '' });
   };
   render() {
     return (

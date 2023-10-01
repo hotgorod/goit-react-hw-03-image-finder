@@ -1,7 +1,9 @@
 import { Component } from 'react';
-import css from './ImageGallery.module.css'
+import css from './ImageGallery.module.css';
 import { getImages } from 'services/getImages';
 import Modal from 'components/Modal/Modal';
+import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
+import Button from 'components/Button/Button';
 
 class ImageGallery extends Component {
   state = {
@@ -23,38 +25,42 @@ class ImageGallery extends Component {
   }
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.searchText !== this.props.searchText) {
-      this.setState(prevState => ({
+      
+      this.setState({
         isLoading: true,
         error: false,
         errorMessage: 'Something went wrong! Try again later',
-        currentPage: 1, 
-      }));
-        
-      
-
-      getImages(this.props.searchText, this.state.currentPage)
-        .then(response => {
-          if (response.status === 200) {
-            return response.json();
-          } else {
-            return Promise.reject(new Error('ErrorDetected'));
-          }
-        })
-        .then(data => {
-          if (data.hits.length === 0) {
-            this.setState({ error: true, errorMessage: 'No results found' });
-            
-          } else {
-            this.setState(prevState => ({
-              images: data.hits,
-              
-            }));
-          }
-        })
-        .catch(() => this.setState({ error: true }))
-        .finally(() => this.setState({ isLoading: false }));
+        currentPage: 1,
+        images: null,
+      });
+      this.loadMoreImages(this.props.searchText, this.state.currentPage);
     }
   }
+  loadMoreImages = (searchText, page) => {
+    getImages(searchText, page)
+      .then(response => {
+        if (response.status === 200) {
+          return response.json();
+        } else {
+          return Promise.reject(new Error('ErrorDetected'));
+        }
+      })
+      .then(data => {
+        if (data.hits.length === 0) {
+          this.setState({ error: true, errorMessage: 'No results found' });
+        } else {
+          this.setState(prevState => ({
+            images: Array.isArray(prevState.images)
+              ? [...prevState.images, ...data.hits]
+              : data.hits,
+            totalImages: data.total,
+            currentPage: prevState.currentPage + 1,
+          }));
+        }
+      })
+      .catch(() => this.setState({ error: true }))
+      .finally(() => this.setState({ isLoading: false }));
+  };
 
   openModal = imageURL => {
     this.setState({ showModal: true, modalImageURL: imageURL });
@@ -78,39 +84,11 @@ class ImageGallery extends Component {
     }
   };
   onLoadMoreClick = () => {
-      this.setState(
-          prevState => ({
-            isLoading: true,
-            currentPage: prevState.currentPage + 1, // Увеличиваем номер текущей страницы
-          }),
-          () => {
-            getImages(this.props.searchText, this.state.currentPage)
-              .then(response => {
-                if (response.status === 200) {
-                  return response.json();
-                } else {
-                  return Promise.reject(new Error('ErrorDetected'));
-                }
-              })
-              .then(data => {
-                if (data.hits.length === 0) {
-                  this.setState({
-                    error: true,
-                    errorMessage: 'No results found',
-                  });
-                } else {
-                  this.setState(prevState => ({
-                    images: [...prevState.images, ...data.hits], // Добавляем новые фотографии к существующим
-                    totalImages: data.total,
-                  }));
-                }
-              })
-              .catch(() => this.setState({ error: true }))
-              .finally(() => this.setState({ isLoading: false }));
-          }
-        );
-      };
- 
+    this.setState(prevState => ({ currentPage: prevState.currentPage + 1 }));
+   
+    this.loadMoreImages(this.props.searchText, this.state.currentPage);
+  };
+
   render() {
     const { images, isLoading, error } = this.state;
     return (
@@ -129,13 +107,12 @@ class ImageGallery extends Component {
           {images &&
             images.map(el => {
               return (
-                <li key={el.id}>
-                  <img
-                    src={el.webformatURL}
-                    alt={el.tags}
-                    onClick={() => this.onImageClick(el.largeImageURL)}
-                  />
-                </li>
+                <ImageGalleryItem
+                  key={el.id}
+                  src={el.webformatURL}
+                  alt={el.tags}
+                  onClick={() => this.onImageClick(el.largeImageURL)}
+                />
               );
             })}
         </ul>
@@ -145,9 +122,9 @@ class ImageGallery extends Component {
             onClick={this.onOverlayClick}
           />
         )}
-        <button type="button" onClick={this.onLoadMoreClick} >
-          Load more
-        </button>
+        {this.state.totalImages > (this.state.images || []).length && (
+          <Button onClick={this.onLoadMoreClick} />
+        )}
       </>
     );
   }
