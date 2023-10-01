@@ -1,6 +1,8 @@
 import { Component } from 'react';
 import css from './SearchForm.module.css';
 
+import { BsSearch } from 'react-icons/bs';
+
 class SearchForm extends Component {
   state = {
     value: '',
@@ -17,7 +19,9 @@ class SearchForm extends Component {
     return (
       <>
         <form className={css.SearchForm} onSubmit={this.handleSubmit}>
+         
           <button type="submit" className={css.SearchFormButton}>
+            <BsSearch/>
             <span className={css.SearchFormButtonLabel}>Search</span>
           </button>
 

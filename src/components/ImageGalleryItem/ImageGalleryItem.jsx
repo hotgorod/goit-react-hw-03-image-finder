@@ -4,7 +4,7 @@ import css from './ImageGalleryItem.module.css'
 export default class ImageGalleryItem extends Component{
     render(){
         return (
-          <li key={this.props.key}>
+          <li >
             <img
               src={this.props.src}
               alt={this.props.alt}
