@@ -16,24 +16,23 @@ class ImageGallery extends Component {
     currentPage: 1,
     totalImages: 0,
   };
-  componentDidMount() {
-    window.addEventListener('keydown', this.onEscapeKey);
-  }
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.onEscapeKey);
-  }
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.searchText !== this.props.searchText) {
-      
       this.setState({
         isLoading: true,
         error: false,
         errorMessage: 'Something went wrong! Try again later',
-        currentPage: 1,
+        
         images: null,
       });
-      this.loadMoreImages(this.props.searchText, this.state.currentPage);
+      
+    }
+    if (
+      prevProps.searchText !== this.props.searchText ||
+      prevProps.currentPage !== this.props.currentPage
+    ) {
+      this.loadMoreImages(this.props.searchText, this.props.currentPage);
     }
   }
   loadMoreImages = (searchText, page) => {
@@ -54,7 +53,7 @@ class ImageGallery extends Component {
               ? [...prevState.images, ...data.hits]
               : data.hits,
             totalImages: data.total,
-            currentPage: prevState.currentPage + 1,
+            // currentPage: prevState.currentPage + 1,
           }));
         }
       })
@@ -74,20 +73,7 @@ class ImageGallery extends Component {
     this.openModal(imageURL);
   };
 
-  onOverlayClick = () => {
-    this.closeModal();
-  };
-
-  onEscapeKey = event => {
-    if (event.key === 'Escape') {
-      this.closeModal();
-    }
-  };
-  onLoadMoreClick = () => {
-    this.setState(prevState => ({ currentPage: prevState.currentPage + 1 }));
-   
-    this.loadMoreImages(this.props.searchText, this.state.currentPage);
-  };
+  
 
   render() {
     const { images, isLoading, error } = this.state;
@@ -119,11 +105,11 @@ class ImageGallery extends Component {
         {this.state.showModal && (
           <Modal
             imageURL={this.state.modalImageURL}
-            onClick={this.onOverlayClick}
+            onClose={this.closeModal}
           />
         )}
         {this.state.totalImages > (this.state.images || []).length && (
-          <Button onClick={this.onLoadMoreClick} />
+          <Button onClick={this.props.onLoadMoreClick} />
         )}
       </>
     );

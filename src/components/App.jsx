@@ -4,20 +4,30 @@ import { Component } from "react";
 
 export class App extends Component {
   state = {
-    searchText:'',
+    searchText: '',
+    currentPage: 1,
   };
 
-  handleSearch = (searchText) => {
+  handleSearch = searchText => {
     this.setState({ searchText });
-  }
+    this.setState({ currentPage: 1 });
+  };
+  onLoadMoreClick = () => {
+    this.setState(prevState => ({ currentPage: prevState.currentPage + 1 }));
 
+    
+  };
   render() {
     return (
-    <div>
+      <div>
         <SearchBar handleSearch={this.handleSearch} />
-        <ImageGallery searchText={this.state.searchText} />
-        
-    </div>
-  );}
+        <ImageGallery
+          currentPage={this.state.currentPage}
+          searchText={this.state.searchText}
+          onLoadMoreClick={this.onLoadMoreClick}
+        />
+      </div>
+    );
+  }
 }
 
